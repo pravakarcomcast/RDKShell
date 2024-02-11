@@ -718,6 +718,8 @@ namespace RdkShell
 
     bool CompositorController::addKeyIntercept(const std::string& client, const uint32_t& keyCode, const uint32_t& flags)
     {
+                Logger::log(Debug, " #### pravakar addKeyIntercept client==>%s keyCode=>%d flags=>%d", client, keyCode,flags);
+
         //Logger::log(LogLevel::Information,  "key intercept added " << keyCode << " flags " << flags << std::endl;
         CompositorListIterator it;
         if (getCompositorInfo(client, it))
@@ -734,12 +736,16 @@ namespace RdkShell
             else
             {
                 std::string clientDisplayName = standardizeName(client);
+            Logger::log(Debug, " #### pravakar addKeyIntercept clientDisplayName==>%s", clientDisplayName);
+
                 bool isEntryAvailable = false;
                 for (int i=0; i<gKeyInterceptInfoMap[keyCode].size(); i++)
                 {
                     struct KeyInterceptInfo& info = gKeyInterceptInfoMap[keyCode][i];
                     if ((info.flags == flags) && (info.compositorInfo.name == clientDisplayName))
                     {
+                        Logger::log(Debug, " #### pravakar addKeyIntercept info.compositorInfo.name==>%s", clientDisplayName);
+
                         isEntryAvailable = true;
                         break;
                     }
@@ -749,8 +755,11 @@ namespace RdkShell
                     gKeyInterceptInfoMap[keyCode].push_back(info);
                 }
             }
+             Logger::log(Debug, " #### pravakar addKeyIntercept return true");
             return true;
         }
+        Logger::log(Debug, " #### pravakar addKeyIntercept return false mesn getCompositorInfo fail");
+
         return false;
     }
 
@@ -1248,6 +1257,7 @@ namespace RdkShell
     void CompositorController::onKeyPress(uint32_t keycode, uint32_t flags, uint64_t metadata, bool physicalKeyPress)
     {
         //Logger::log(LogLevel::Information,  "key press code " << keycode << " flags " << flags << std::endl;
+        Logger::log(Debug, " #### pravakar onKeyPress keycode==>%d flags=>%d", keycode, onKeyPress);
         double currentTime = RdkShell::seconds();
         if ((true == physicalKeyPress) && (0.0 == gLastKeyPressStartTime))
         {
@@ -1272,13 +1282,17 @@ namespace RdkShell
 
         if (false == isInterceptAvailable && gFocusedCompositor.compositor)
         {
+            Logger::log(Debug, " #### pravakar isInterceptAvailable if is false ==>%d flags=>%d", keycode, onKeyPress);
             gFocusedCompositor.compositor->onKeyPress(keycode, flags, metadata);
             bubbleKey(keycode, flags, metadata, true);
         }
         else
         {
             std::string focusedClientName = !gFocusedCompositor.name.empty() ? gFocusedCompositor.name : "none";
+            Logger::log(Debug, " #### pravakar isInterceptAvailable else ==>%d flags=>%d", keycode, onKeyPress);
+
             Logger::log(LogLevel::Information,  "rdkshell_focus key intercepted: %d focused client: %s", isInterceptAvailable, focusedClientName.c_str());
+            
         }
         if (gRdkShellEventListener && physicalKeyPress)
         {
@@ -1289,6 +1303,7 @@ namespace RdkShell
 
     void CompositorController::onKeyRelease(uint32_t keycode, uint32_t flags, uint64_t metadata, bool physicalKeyPress)
     {
+        
         //Logger::log(LogLevel::Information,  "key release code " << keycode << " flags " << flags << std::endl;
         if ((false == gRdkShellPowerKeyReleaseOnlyEnabled) && (keycode != 0) && ((keycode == gPowerKeyCode) || ((gFrontPanelButtonCode != 0) && (keycode == gFrontPanelButtonCode))))
         {
